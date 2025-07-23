@@ -1,0 +1,13 @@
+name = "d-schema"
+version = "0.1.0"
+description = "A tool to generate database schemas in various formats."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mysql-connector-python>=9.4.0",
+    "psycopg2-binary>=2.9.10",
+    "sqlalchemy>=2.0.0",
+]
+
+[project.scripts]
+d-schema = "d_schema.main:main"
