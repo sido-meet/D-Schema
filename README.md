@@ -1,6 +1,6 @@
 # D-Schema
 
-D-Schema is a versatile Python-based tool designed to connect to a given database, parse its structure, and generate various database schema definitions. The core of the project utilizes SQLAlchemy to create an in-memory representation of the database, which is then used to build different schema formats. This flexible architecture allows for easy extension to support new schema types in the future.
+D-Schema is a versatile Python-based tool designed to connect to a given database, parse its structure, and generate various database schema definitions. The project is architected to be highly modular, with a clear separation between database parsing and schema generation. This flexible design allows for easy extension to support new schema types in the future.
 
 ## Features
 
@@ -8,10 +8,19 @@ D-Schema is a versatile Python-based tool designed to connect to a given databas
 - **Multiple Schema Formats**: Designed to generate various types of schema definitions from a single database source.
   - **Currently Implemented**:
     - `DDL Schema`: The standard `CREATE TABLE` SQL statements.
-  - **Planned**:
     - `MAC-SQL Schema`: A detailed, commented format suitable for analysis.
+  - **Planned**:
     - `M-Schema`: A compact, human-readable format.
 - **Extensible by Design**: The internal class structure makes it straightforward to add new schema generators.
+
+## Project Structure
+
+The project is organized into the following key modules:
+
+- `d_schema/structures.py`: Defines the `dataclass` structures that represent the database schema in a vendor-neutral format.
+- `d_schema/db_parser.py`: Contains the `DatabaseParser` class, which connects to the database, extracts the schema, and populates the `dataclass` structures.
+- `d_schema/schema_generator.py`: Contains the `SchemaGenerator` class, which takes the populated `dataclass` structures and generates the final schema string.
+- `d_schema/main.py`: The command-line interface that ties everything together.
 
 ## Installation
 
@@ -39,11 +48,11 @@ To generate a schema, use the `d-schema` command-line tool.
 
 **Example:**
 ```bash
-d-schema --db-url "sqlite:///test_data/test.db" --schema-type ddl
+d-schema --db-url "sqlite:///test_data/test.db" --schema-type mac-sql
 ```
 
 - `--db-url`: The SQLAlchemy database URL for the target database.
-- `--schema-type`: The type of schema to generate. Currently, only `ddl` is supported.
+- `--schema-type`: The type of schema to generate. Currently supports `ddl` and `mac-sql`.
 
 ## Testing
 
@@ -82,7 +91,7 @@ A convenience script, `run_tests.sh`, is provided to execute `d-schema` against 
 ```bash
 bash run_tests.sh
 ```
-This will run the DDL generation for SQLite, PostgreSQL, and MySQL, allowing you to verify the output for each.
+This will run the DDL and MAC-SQL generation for SQLite, PostgreSQL, and MySQL, allowing you to verify the output for each.
 
 ## Schema Formats Explained
 
@@ -94,39 +103,25 @@ Standard SQL Data Definition Language (DDL) statements. This format is ideal for
 
 **Example (`superhero` database):**
 ```sql
-# Table: hero_power
-CREATE TABLE hero_power (
-    hero_id INTEGER,
-    power_id INTEGER,
-    FOREIGN KEY (hero_id) REFERENCES hero(id),
-    FOREIGN KEY (power_id) REFERENCES superpower(id)
-);
-
-# Table: superpower
-CREATE TABLE superpower (
-    id INTEGER PRIMARY KEY,
-    power_name TEXT
+# Table: hero
+CREATE TABLE hero (
+    id INTEGER NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id)
 );
 ```
 
-### 2. MAC-SQL Schema (Planned)
+### 2. MAC-SQL Schema
 
 A more descriptive format that includes table and column details, primary keys, and foreign key relationships in a commented, structured layout.
 
 **Example (`superhero` database):**
 ```
-[DB_ID] superhero
-[Schema]
-# Table: hero_power
-(hero_id, hero id.),
-(power_id, power id.)
-
-# Table: superpower
-(id, id.),
-(power_name, power name, Value examples:['Agility'])
-
-[Foreign keys]
-hero_power.power_id = superpower.id
+# Table: hero
+[
+(id, the id of the hero. Value examples: ['1'].)
+(name, the name of the hero. Value examples: ['Superman'].)
+]
 ```
 
 ### 3. M-Schema (Planned)
@@ -152,10 +147,10 @@ hero_power.power_id = superpower.id
 
 ## Roadmap
 
-- [x] ✅ **Phase 1: DDL Schema Implementation**
+- [x] **Phase 1: DDL Schema Implementation**
   - Core database parsing logic using SQLAlchemy.
   - Generator for standard DDL `CREATE TABLE` statements.
-- [ ] **Phase 2: MAC-SQL Schema**
+- [x] **Phase 2: MAC-SQL Schema**
   - Develop the generator for the detailed MAC-SQL format.
 - [ ] **Phase 3: M-Schema**
   - Develop the generator for the compact M-Schema format.
@@ -164,7 +159,7 @@ hero_power.power_id = superpower.id
 
 Contributions are welcome! If you would like to help, please feel free to submit a pull request. For major changes, please open an issue first to discuss what you would like to change.
 
-To add a new schema generator, you can create a new method within the schema generation class and expose it via the command-line interface in `main.py`.
+To add a new schema generator, you can create a new method within the `SchemaGenerator` class in `d_schema/schema_generator.py` and expose it via the command-line interface in `d_schema/main.py`. The generator should only rely on the `DatabaseSchema` object passed to its constructor.
 
 ## License
 

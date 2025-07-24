@@ -1,0 +1,48 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Build and distribution directories
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environments
+.venv/
+
+# Database files
+*.db
+
+# IDE specific files
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+
+# Test coverage reports
+.coverage
+htmlcov/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Log files
+*.log
+
+# Environment variables
+.env
+
+# Local development configuration
+local_settings.py
+
+# SQLite journal files
+*-journal
+
+# macOS folder attributes
+__MACOSX/

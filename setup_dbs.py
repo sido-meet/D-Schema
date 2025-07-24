@@ -1,3 +1,4 @@
+# setup_dbs.py
 import time
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS superpower (
 CREATE TABLE IF NOT EXISTS hero_power (
     hero_id INTEGER,
     power_id INTEGER,
+    PRIMARY KEY (hero_id, power_id),
     FOREIGN KEY (hero_id) REFERENCES hero(id),
     FOREIGN KEY (power_id) REFERENCES superpower(id)
 );
@@ -47,7 +49,8 @@ def setup_mysql_database():
 
 
 def setup_database(engine):
-    """Creates tables in the given database."""
+    """Creates tables and inserts data in the given database."""
+    dialect = engine.dialect.name
     with engine.connect() as connection:
         trans = connection.begin()
         try:
@@ -55,8 +58,27 @@ def setup_database(engine):
             for statement in SCHEMA_DDL.strip().split(';'):
                 if statement.strip():
                     connection.execute(text(statement))
+            
+            # Insert sample data based on dialect
+            if dialect == 'postgresql':
+                connection.execute(text("INSERT INTO hero (id, name) VALUES (1, 'Superman') ON CONFLICT (id) DO NOTHING"))
+                connection.execute(text("INSERT INTO superpower (id, power_name) VALUES (1, 'Flight') ON CONFLICT (id) DO NOTHING"))
+                connection.execute(text("INSERT INTO superpower (id, power_name) VALUES (2, 'Super Strength') ON CONFLICT (id) DO NOTHING"))
+            elif dialect == 'mysql':
+                connection.execute(text("INSERT IGNORE INTO hero (id, name) VALUES (1, 'Superman')"))
+                connection.execute(text("INSERT IGNORE INTO superpower (id, power_name) VALUES (1, 'Flight')"))
+                connection.execute(text("INSERT IGNORE INTO superpower (id, power_name) VALUES (2, 'Super Strength')"))
+            elif dialect == 'sqlite':
+                connection.execute(text("INSERT OR IGNORE INTO hero (id, name) VALUES (1, 'Superman')"))
+                connection.execute(text("INSERT OR IGNORE INTO superpower (id, power_name) VALUES (1, 'Flight')"))
+                connection.execute(text("INSERT OR IGNORE INTO superpower (id, power_name) VALUES (2, 'Super Strength')"))
+
+            # This will fail if the combination already exists, which is fine
+            connection.execute(text("INSERT INTO hero_power (hero_id, power_id) VALUES (1, 1)"))
+            connection.execute(text("INSERT INTO hero_power (hero_id, power_id) VALUES (1, 2)"))
+
             trans.commit()
-            print(f"Successfully set up schema for {engine.url.database} on {engine.url.drivername}.")
+            print(f"Successfully set up schema and data for {engine.url.database} on {engine.url.drivername}.")
         except Exception as e:
             print(f"An error occurred during schema setup for {engine.url.drivername}: {e}")
             trans.rollback()
@@ -64,7 +86,7 @@ def setup_database(engine):
 def main():
     """Main function to set up all configured databases."""
     # Setup PostgreSQL
-    print("---" + " Setting up POSTGRES ---")
+    print("--- Setting up POSTGRES ---")
     try:
         pg_engine = create_engine(DB_CONFIG["postgres"])
         setup_database(pg_engine)
@@ -72,7 +94,7 @@ def main():
         print(f"An error occurred during PostgreSQL setup: {e}")
 
     # Setup MySQL
-    print("\n---" + " Setting up MYSQL ---")
+    print("\n--- Setting up MYSQL ---")
     setup_mysql_database()
 
 

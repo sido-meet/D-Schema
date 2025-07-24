@@ -1,3 +1,4 @@
+[project]
 name = "d-schema"
 version = "0.1.0"
 description = "A tool to generate database schemas in various formats."

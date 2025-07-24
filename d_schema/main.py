@@ -1,3 +1,4 @@
+# d_schema/main.py
 
 import argparse
 from d_schema.db_parser import DatabaseParser
@@ -9,7 +10,7 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Generate database schemas in various formats.")
     parser.add_argument("--db-url", required=True, help="The SQLAlchemy database URL (e.g., 'sqlite:///mydatabase.db')")
-    parser.add_argument("--schema-type", required=True, choices=['ddl'], default='ddl', help="The type of schema to generate.")
+    parser.add_argument("--schema-type", required=True, choices=['ddl', 'mac-sql'], default='ddl', help="The type of schema to generate.")
     
     args = parser.parse_args()
     
@@ -17,23 +18,25 @@ def main():
         # 1. Parse the database
         print(f"Connecting to {args.db_url}...")
         db_parser = DatabaseParser(db_url=args.db_url)
-        metadata = db_parser.get_metadata()
+        database_schema = db_parser.parse()
         print("Database parsed successfully.")
 
         # 2. Generate the schema
-        schema_generator = SchemaGenerator(metadata=metadata)
+        schema_generator = SchemaGenerator(schema=database_schema)
         
         output_schema = ""
         if args.schema_type == 'ddl':
             print("Generating DDL schema...")
-            output_schema = schema_generator.generate_ddl_schema(engine=db_parser.engine)
+            output_schema = schema_generator.generate_ddl_schema()
+        elif args.schema_type == 'mac-sql':
+            print("Generating MAC-SQL schema...")
+            output_schema = schema_generator.generate_mac_sql_schema()
         else:
-            # This part will be expanded for other schema types
             print(f"Schema type '{args.schema_type}' is not yet supported.")
             return
 
         # 3. Print the result
-        print("\n---" + " Generated Schema ---\n")
+        print("\n--- Generated Schema ---\n")
         print(output_schema)
 
     except Exception as e:
