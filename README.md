@@ -9,8 +9,8 @@ D-Schema is a versatile Python-based tool designed to connect to a given databas
   - **Currently Implemented**:
     - `DDL Schema`: The standard `CREATE TABLE` SQL statements.
     - `MAC-SQL Schema`: A detailed, commented format suitable for analysis.
-  - **Planned**:
     - `M-Schema`: A compact, human-readable format.
+  - **Planned**:
 - **Extensible by Design**: The internal class structure makes it straightforward to add new schema generators.
 
 ## Project Structure
@@ -52,7 +52,7 @@ d-schema --db-url "sqlite:///test_data/test.db" --schema-type mac-sql
 ```
 
 - `--db-url`: The SQLAlchemy database URL for the target database.
-- `--schema-type`: The type of schema to generate. Currently supports `ddl` and `mac-sql`.
+- `--schema-type`: The type of schema to generate. Currently supports `ddl`, `mac-sql`, and `m-schema`.
 
 ## Testing
 
@@ -124,7 +124,7 @@ A more descriptive format that includes table and column details, primary keys, 
 ]
 ```
 
-### 3. M-Schema (Planned)
+### 3. M-Schema
 
 A minimal, clean representation focusing on the essential structure, tables, and columns.
 
@@ -152,7 +152,7 @@ hero_power.power_id = superpower.id
   - Generator for standard DDL `CREATE TABLE` statements.
 - [x] **Phase 2: MAC-SQL Schema**
   - Develop the generator for the detailed MAC-SQL format.
-- [ ] **Phase 3: M-Schema**
+- [x] **Phase 3: M-Schema**
   - Develop the generator for the compact M-Schema format.
 
 ## Contributing

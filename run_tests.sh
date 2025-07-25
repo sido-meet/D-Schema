@@ -47,3 +47,26 @@ echo "--- MySQL (MAC-SQL) verification complete. ---"
 echo ""
 
 echo "All schema generation tests completed successfully!"
+
+echo "
+--- VERIFYING M-SCHEMAS ---"
+
+echo "--- VERIFYING SQLITE (M-SCHEMA) ---"
+uv run d-schema --db-url "sqlite:///test_data/test.db" --schema-type m-schema
+echo ""
+echo "--- SQLite (M-SCHEMA) verification complete. ---"
+echo ""
+
+echo "--- VERIFYING POSTGRESQL (M-SCHEMA) ---"
+uv run d-schema --db-url "postgresql://postgres:mysecretpassword@localhost:5432/postgres" --schema-type m-schema
+echo ""
+echo "--- PostgreSQL (M-SCHEMA) verification complete. ---"
+echo ""
+
+echo "--- VERIFYING MYSQL (M-SCHEMA) ---"
+uv run d-schema --db-url "mysql+mysqlconnector://root:mysecretpassword@localhost:3306/test_schema" --schema-type m-schema
+echo ""
+echo "--- MySQL (M-SCHEMA) verification complete. ---"
+echo ""
+
+echo "All schema generation tests completed successfully!"
