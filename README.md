@@ -66,10 +66,12 @@ Make sure you have Docker installed and running. Then, start the required databa
   ```bash
   docker run --name test-postgres -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres
   ```
+  For subsequent runs, if the container is stopped, use: `sudo docker start test-postgres`
 - **MySQL:**
   ```bash
   docker run --name test-mysql -e MYSQL_ROOT_PASSWORD=mysecretpassword -p 3306:3306 -d mysql
   ```
+  For subsequent runs, if the container is stopped, use: `sudo docker start test-mysql`
 
 ### 2. Set Up Test Databases
 
@@ -154,6 +156,14 @@ hero_power.power_id = superpower.id
   - Develop the generator for the detailed MAC-SQL format.
 - [x] **Phase 3: M-Schema**
   - Develop the generator for the compact M-Schema format.
+- [ ] **Phase 4: AI-Powered Schema Enrichment**
+  - Implement an `AIEnricher` module to intelligently enhance schema details.
+  - **Column Comment Generation**: Automatically generate comments for columns where they are missing, using column name, type, and data samples as context for an LLM.
+  - **Name Clarification**: For tables or columns with ambiguous or abbreviated names (e.g., `cust_ord_dtl`), use an LLM to infer and generate a natural language explanation of its likely business purpose.
+- [ ] **Phase 5: Advanced Features & Integrations**
+  - **Relationship Inference**: Detect and suggest potential relationships between tables that lack formal foreign key constraints.
+  - **Data Anonymization**: Add an option to anonymize sensitive data found in column samples.
+  - **New Export Formats**: Extend generation to support formats like JSON Schema, GraphQL Schema, or Graphviz visualization.
 
 ## Contributing
 
