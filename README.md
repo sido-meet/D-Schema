@@ -156,11 +156,20 @@ hero_power.power_id = superpower.id
   - Develop the generator for the detailed MAC-SQL format.
 - [x] **Phase 3: M-Schema**
   - Develop the generator for the compact M-Schema format.
-- [ ] **Phase 4: AI-Powered Schema Enrichment**
-  - Implement an `AIEnricher` module to intelligently enhance schema details.
+- [ ] **Phase 4: Database Profiling**
+  - **Statistical Analysis**: Enhance the `DatabaseParser` to compute and store key statistics.
+    - Table-level: record count.
+    - Column-level: NULL vs. non-NULL count, distinct value count, min/max values, character length (min/max/avg), and alphabet analysis (e.g., upper/lower/punctuation).
+  - **Data Shape & Sketches**:
+    - Capture the "shape" of fields to provide deeper insights into data patterns.
+    - Generate and store a sample of the top-k most frequent values for each column.
+    - Implement MinHash sketching for efficient similarity comparisons.
+  - **Schema Integration**: Update the `DatabaseSchema` structure to store this metadata, making it accessible to all schema generators.
+- [ ] **Phase 5: AI-Powered Schema Enrichment**
+  - Implement an `AIEnricher` module to intelligently enhance schema details, using the rich context from the profiling phase.
   - **Column Comment Generation**: Automatically generate comments for columns where they are missing, using column name, type, and data samples as context for an LLM.
   - **Name Clarification**: For tables or columns with ambiguous or abbreviated names (e.g., `cust_ord_dtl`), use an LLM to infer and generate a natural language explanation of its likely business purpose.
-- [ ] **Phase 5: Advanced Features & Integrations**
+- [ ] **Phase 6: Advanced Features & Integrations**
   - **Relationship Inference**: Detect and suggest potential relationships between tables that lack formal foreign key constraints.
   - **Data Anonymization**: Add an option to anonymize sensitive data found in column samples.
   - **New Export Formats**: Extend generation to support formats like JSON Schema, GraphQL Schema, or Graphviz visualization.
