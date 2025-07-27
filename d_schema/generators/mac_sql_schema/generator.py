@@ -19,9 +19,11 @@ class MacSQLSchemaGenerator(BaseGenerator):
 
         if column.profile:
             profile_parts = []
-            if column.profile.non_null_count is not None and table_record_count > 0:
-                non_null_pct = (column.profile.non_null_count / table_record_count) * 100
-                profile_parts.append(f"{non_null_pct:.1f}% non-null")
+            if column.profile.non_null_count is not None and column.profile.null_count is not None:
+                total = column.profile.non_null_count + column.profile.null_count
+                if total > 0:
+                    non_null_pct = (column.profile.non_null_count / total) * 100
+                    profile_parts.append(f"{non_null_pct:.1f}% non-null")
             if column.profile.distinct_count is not None:
                 profile_parts.append(f"{column.profile.distinct_count} distinct")
             if column.profile.min_value is not None:

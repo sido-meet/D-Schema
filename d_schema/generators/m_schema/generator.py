@@ -35,6 +35,18 @@ class MSchemaGenerator(BaseGenerator):
         if column.samples:
             samples_str = ", ".join([f"{s}" for s in column.samples])
             col_parts.append(f"Examples:[{samples_str}]")
+
+        if column.profile:
+            profile_parts = []
+            if column.profile.non_null_count is not None and column.profile.null_count is not None:
+                total = column.profile.non_null_count + column.profile.null_count
+                if total > 0:
+                    non_null_pct = (column.profile.non_null_count / total) * 100
+                    profile_parts.append(f"{non_null_pct:.1f}% non-null")
+            if column.profile.distinct_count is not None:
+                profile_parts.append(f"{column.profile.distinct_count} distinct values")
+            if profile_parts:
+                col_parts.append(f"Profile: {', '.join(profile_parts)}")
         
         return f"({', '.join(col_parts)})"
 

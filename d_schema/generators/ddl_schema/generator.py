@@ -12,11 +12,25 @@ class DDLSchemaGenerator(BaseGenerator):
     def generate_column(self, column: ColumnInfo) -> str:
         """
         Generates the DDL definition for a single column.
-        Example: 'id INTEGER NOT NULL'
+        Example: 'id INTEGER NOT NULL -- Profile: 100.0% non-null, 1500 distinct'
         """
         col_def = f"    {column.name} {column.type}"
         if not column.nullable:
             col_def += " NOT NULL"
+        
+        if column.profile:
+            profile_parts = []
+            if column.profile.non_null_count is not None and column.profile.null_count is not None:
+                total = column.profile.non_null_count + column.profile.null_count
+                if total > 0:
+                    non_null_pct = (column.profile.non_null_count / total) * 100
+                    profile_parts.append(f"{non_null_pct:.1f}% non-null")
+            if column.profile.distinct_count is not None:
+                profile_parts.append(f"{column.profile.distinct_count} distinct")
+            
+            if profile_parts:
+                col_def += f"  -- Profile: {', '.join(profile_parts)}"
+
         return col_def
 
     def generate_table(self, table: TableInfo) -> str:

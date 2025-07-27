@@ -49,11 +49,12 @@ To generate a schema, use the `d-schema` command-line tool.
 
 **Example:**
 ```bash
-d-schema --db-url "sqlite:///test_data/test.db" --schema-type mac-sql
+d-schema --db-url "sqlite:///test_data/test.db" --schema-type mac-sql-schema --profile
 ```
 
 - `--db-url`: The SQLAlchemy database URL for the target database.
-- `--schema-type`: The type of schema to generate. Currently supports `ddl`, `mac-sql`, and `m-schema`.
+- `--schema-type`: The type of schema to generate. Use `d-schema --help` to see a full list of available generator plugins.
+- `--profile`: (Optional) Enables detailed data profiling. This can be slow on large databases but enriches the schema with valuable statistics.
 
 ## Testing
 
@@ -98,54 +99,59 @@ This will run the DDL and MAC-SQL generation for SQLite, PostgreSQL, and MySQL, 
 
 ## Schema Formats Explained
 
-This section provides examples of the different schema formats that D-Schema aims to support, using a sample `superhero` database.
+This section provides examples of the different schema formats that D-Schema aims to support. When run with the `--profile` flag, schemas will be enriched with statistical data.
 
 ### 1. DDL Schema
 
-Standard SQL Data Definition Language (DDL) statements. This format is ideal for recreating the database structure.
+Standard SQL Data Definition Language (DDL) statements. When profiling is enabled, key statistics are added as comments.
 
-**Example (`superhero` database):**
+**Example (`--profile` enabled):**
 ```sql
 # Table: hero
 CREATE TABLE hero (
-    id INTEGER NOT NULL,
-    name VARCHAR(100) NOT NULL,
+    id INTEGER NOT NULL,  -- Profile: 100.0% non-null, 1 distinct
+    name VARCHAR(100) NOT NULL,  -- Profile: 100.0% non-null, 1 distinct
     PRIMARY KEY (id)
 );
 ```
 
 ### 2. MAC-SQL Schema
 
-A more descriptive format that includes table and column details, primary keys, and foreign key relationships in a commented, structured layout.
+A more descriptive format that includes table and column details. It natively integrates profiling data when available.
 
-**Example (`superhero` database):**
+**Example (`--profile` enabled):**
 ```
-# Table: hero
+# Table: hero (1 rows)
 [
-(id, the id of the hero. Value examples: ['1'].)
-(name, the name of the hero. Value examples: ['Superman'].)
+(id, the id of the hero. Value examples: ['1']. (Profile: 100.0% non-null, 1 distinct, min='1', max='1'))
+(name, the name of the hero. Value examples: ['Superman']. (Profile: 100.0% non-null, 1 distinct, min='Superman', max='Superman', avg_len=8.0))
 ]
 ```
 
 ### 3. M-Schema
 
-A minimal, clean representation focusing on the essential structure, tables, and columns.
+A minimal, clean representation. Profiling data is added as an extra element in the column's descriptive tuple.
 
-**Example (`superhero` database):**
+**Example (`--profile` enabled):**
 ```
-[DB_ID] superhero
-[Schema]
-# Table: hero_power
-(hero_id:INTEGER, Primary Key, the id of the hero, Maps to superhero(id), Examples:[1, 2, 3]),
-(power_id:INTEGER, the id of the power, Maps to superpower(id), Examples:[1, 18, 26])
+# Table: hero
+(id:INTEGER, Primary Key, the id of the hero, Examples:[1], Profile: 100.0% non-null, 1 distinct values)
+(name:TEXT, the name of the hero, Examples:[Superman], Profile: 100.0% non-null, 1 distinct values)
+```
 
-# Table: superpower
-(id:INTEGER, Primary Key, the unique identifier of the superpower, Examples:[1, 2]),
-(power_name:TEXT, the superpower name, Examples:['Agility', 'Accelerated Healing'])
+### 4. Profile Report
 
-[Foreign keys]
-hero_power.hero_id = superhero.id
-hero_power.power_id = superpower.id
+A detailed, human-readable report in Markdown format, designed specifically to display all collected profiling statistics. This format is only available when using the `--profile` flag.
+
+**Example (`--schema-type profile-report --profile`):**
+```markdown
+### Table: `hero`
+*Record Count: 1*
+
+| Column Name | Data Type | Profile Details |
+|-------------|-----------|-----------------|
+| id | INTEGER | **Non-Null**: 100.0%<br>**Distinct**: 1<br>**Min**: 1<br>**Max**: 1<br>**Top Values**: '1' (1) |
+| name | TEXT | **Non-Null**: 100.0%<br>**Distinct**: 1<br>**Min**: Superman<br>**Max**: Superman<br>**Avg. Len**: 8.00<br>**Top Values**: 'Superman' (1) |
 ```
 
 ## Roadmap
@@ -157,7 +163,7 @@ hero_power.power_id = superpower.id
   - Develop the generator for the detailed MAC-SQL format.
 - [x] **Phase 3: M-Schema**
   - Develop the generator for the compact M-Schema format.
-- [ ] **Phase 4: Database Profiling**
+- [x] **Phase 4: Database Profiling**
   - **Statistical Analysis**: Enhance the `DatabaseParser` to compute and store key statistics.
     - Table-level: record count.
     - Column-level: NULL vs. non-NULL count, distinct value count, min/max values, character length (min/max/avg), and alphabet analysis (e.g., upper/lower/punctuation).
@@ -165,7 +171,7 @@ hero_power.power_id = superpower.id
     - Capture the "shape" of fields to provide deeper insights into data patterns.
     - Generate and store a sample of the top-k most frequent values for each column.
     - Implement MinHash sketching for efficient similarity comparisons.
-  - **Schema Integration**: Update the `DatabaseSchema` structure to store this metadata, making it accessible to all schema generators.
+  - **Schema Integration**: Update the `DatabaseSchema` structure to store this metadata and integrate it into the schema generators as non-invasive annotations or as a dedicated profiling report.
 - [ ] **Phase 5: AI-Powered Schema Enrichment**
   - Implement an `AIEnricher` module to intelligently enhance schema details, using the rich context from the profiling phase.
   - **Column Comment Generation**: Automatically generate comments for columns where they are missing, using column name, type, and data samples as context for an LLM.
