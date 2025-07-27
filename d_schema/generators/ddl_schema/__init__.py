@@ -1,0 +1,1 @@
+# DDL Schema Generator Plugin
