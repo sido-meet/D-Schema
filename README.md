@@ -19,8 +19,9 @@ The project is organized into the following key modules:
 
 - `d_schema/structures.py`: Defines the `dataclass` structures that represent the database schema in a vendor-neutral format.
 - `d_schema/db_parser.py`: Contains the `DatabaseParser` class, which connects to the database, extracts the schema, and populates the `dataclass` structures.
-- `d_schema/schema_generator.py`: Contains the `SchemaGenerator` class, which takes the populated `dataclass` structures and generates the final schema string.
-- `d_schema/main.py`: The command-line interface that ties everything together.
+- `d_schema/generators/`: A package directory containing the schema generator plugins. Each subdirectory is a self-contained plugin for a specific schema format (e.g., `ddl_schema`, `m_schema`).
+  - `base_generator.py`: Defines the `BaseGenerator` abstract class that all plugins must inherit from.
+- `d_schema/main.py`: The command-line interface that dynamically discovers and runs the generator plugins.
 
 ## Installation
 
@@ -178,7 +179,7 @@ hero_power.power_id = superpower.id
 
 Contributions are welcome! If you would like to help, please feel free to submit a pull request. For major changes, please open an issue first to discuss what you would like to change.
 
-To add a new schema generator, you can create a new method within the `SchemaGenerator` class in `d_schema/schema_generator.py` and expose it via the command-line interface in `d_schema/main.py`. The generator should only rely on the `DatabaseSchema` object passed to its constructor.
+To add a new schema generator, simply create a new subdirectory in `d_schema/generators/`. The directory name will be used as the `--schema-type` argument (e.g., `new_format` for `d_schema/generators/new_format/`). Inside this new directory, create a `generator.py` file containing a class that inherits from `BaseGenerator` and implements the required methods. The `main.py` script will automatically discover and integrate your new plugin.
 
 ## License
 
