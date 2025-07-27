@@ -11,14 +11,15 @@ def main():
     parser = argparse.ArgumentParser(description="Generate database schemas in various formats.")
     parser.add_argument("--db-url", required=True, help="The SQLAlchemy database URL (e.g., 'sqlite:///mydatabase.db')")
     parser.add_argument("--schema-type", required=True, choices=['ddl', 'mac-sql', 'm-schema'], default='ddl', help="The type of schema to generate.")
-    
+    parser.add_argument("--profile", action='store_true', help="Enable detailed data profiling (can be slow).")
+
     args = parser.parse_args()
     
     try:
         # 1. Parse the database
         print(f"Connecting to {args.db_url}...")
         db_parser = DatabaseParser(db_url=args.db_url)
-        database_schema = db_parser.parse()
+        database_schema = db_parser.parse(profile=args.profile)
         print("Database parsed successfully.")
 
         # 2. Generate the schema

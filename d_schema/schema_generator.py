@@ -58,21 +58,44 @@ class SchemaGenerator:
 
     def generate_mac_sql_schema(self) -> str:
         """
-        Generates a MAC-SQL schema.
+        Generates a MAC-SQL schema, including profiling data if available.
 
         Returns:
             A string containing the MAC-SQL schema.
         """
         schema_parts = []
         for table in self.schema.tables:
-            schema_parts.append(f"# Table: {table.name}")
+            table_header = f"# Table: {table.name}"
+            if table.profile and table.profile.record_count is not None:
+                table_header += f" ({table.profile.record_count} rows)"
+            schema_parts.append(table_header)
             schema_parts.append("[")
             
             column_details = []
             for column in table.columns:
                 comment = column.comment or f"the {column.name.replace('_', ' ')} of the {table.name}"
                 samples_str = ", ".join([f"'{s}'" for s in column.samples])
-                column_details.append(f"({column.name}, {comment}. Value examples: [{samples_str}].)")
+                base_detail = f"({column.name}, {comment}. Value examples: [{samples_str}].)"
+
+                # Append profiling information if available
+                if column.profile:
+                    profile_parts = []
+                    if column.profile.non_null_count is not None and table.profile.record_count > 0:
+                        non_null_pct = (column.profile.non_null_count / table.profile.record_count) * 100
+                        profile_parts.append(f"{non_null_pct:.1f}% non-null")
+                    if column.profile.distinct_count is not None:
+                        profile_parts.append(f"{column.profile.distinct_count} distinct")
+                    if column.profile.min_value is not None:
+                        profile_parts.append(f"min='{column.profile.min_value}'")
+                    if column.profile.max_value is not None:
+                        profile_parts.append(f"max='{column.profile.max_value}'")
+                    if column.profile.avg_char_length is not None:
+                        profile_parts.append(f"avg_len={column.profile.avg_char_length:.1f}")
+                    
+                    if profile_parts:
+                        base_detail += f" (Profile: { ', '.join(profile_parts) })"
+
+                column_details.append(base_detail)
             
             schema_parts.append("\n".join(column_details))
             schema_parts.append("]")
