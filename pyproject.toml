@@ -14,5 +14,6 @@ dependencies = [
 [project.scripts]
 d-schema = "d_schema.main:main"
 
-[tool.setuptools]
-packages = ["d_schema"]
+[tool.setuptools.packages.find]
+include = ["d_schema*" ]
+exclude = ["tests*"]
