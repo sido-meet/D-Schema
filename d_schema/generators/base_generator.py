@@ -1,20 +1,21 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 
-from d_schema.structures import TableInfo, ColumnInfo
+from d_schema.structures import TableInfo, ColumnInfo, DatabaseSchema
 
 
 class BaseGenerator(ABC):
     """
     Abstract base class for all schema generators.
 
-    It defines a standard interface for generating schemas from a list of
-    TableInfo objects. Subclasses must implement the specific logic for
-    generating parts of the schema (e.g., for a column or a table).
+    It defines a standard interface for generating schemas from a DatabaseSchema
+    object. Subclasses must implement the specific logic for generating parts
+    of the schema (e.g., for a column or a table).
     """
 
-    def __init__(self, tables: List[TableInfo]):
-        self.tables = tables
+    def __init__(self, schema: DatabaseSchema):
+        self.schema = schema
+        self.tables = schema.tables
 
     @abstractmethod
     def generate_column(self, column: ColumnInfo) -> Dict[str, Any]:

@@ -14,7 +14,7 @@ class MSchemaGenerator(BaseGenerator):
         Initializes the generator with a DatabaseSchema object.
         M-Schema requires the db_name, so we override the init.
         """
-        super().__init__(schema.tables)
+        super().__init__(schema)
         self.db_name = schema.db_name
 
     def generate_column(self, column: ColumnInfo, table_name: str) -> str:

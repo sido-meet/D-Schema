@@ -1,6 +1,6 @@
 import unittest
 from d_schema.structures import DatabaseSchema, TableInfo, ColumnInfo
-from d_schema.schema_generator import SchemaGenerator
+from d_schema.generators.m_schema.generator import MSchemaGenerator
 
 class TestSchemaGenerator(unittest.TestCase):
     def setUp(self):
@@ -31,11 +31,11 @@ class TestSchemaGenerator(unittest.TestCase):
                 )
             ]
         )
-        self.generator = SchemaGenerator(self.mock_schema)
+        self.generator = MSchemaGenerator(self.mock_schema)
 
     def test_generate_m_schema(self):
         """Test the M-Schema generation."""
-        m_schema_output = self.generator.generate_m_schema()
+        m_schema_output = self.generator.generate_schema()
         
         expected_output = """
 [DB_ID] test_db

@@ -56,13 +56,7 @@ def main():
 
         # 3. Instantiate and run the generator
         print(f"Generating {args.schema_type} schema...")
-        
-        # Handle the special case for MSchemaGenerator which needs the whole schema object
-        if args.schema_type == 'm-schema':
-            generator_instance = GeneratorClass(schema=database_schema)
-        else:
-            generator_instance = GeneratorClass(tables=database_schema.tables)
-            
+        generator_instance = GeneratorClass(schema=database_schema)
         output_schema = generator_instance.generate_schema()
 
         # 4. Print the result
