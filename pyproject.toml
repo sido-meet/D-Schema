@@ -14,6 +14,5 @@ dependencies = [
 [project.scripts]
 d-schema = "d_schema.main:main"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["d_schema*"]
+[tool.setuptools]
+packages = ["d_schema"]
