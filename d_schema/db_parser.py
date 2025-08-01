@@ -1,6 +1,6 @@
 # d_schema/db_parser.py
 
-from sqlalchemy import create_engine, inspect, select, distinct, func, MetaData, String
+from sqlalchemy import create_engine, inspect, select, distinct, func, MetaData, String, Date
 from sqlalchemy.exc import SQLAlchemyError
 from datasketch import MinHash, LeanMinHash
 from .structures import (
@@ -75,11 +75,20 @@ class DatabaseParser:
                     # Fetch sample values
                     try:
                         meta_column = meta_table.c[column["name"]]
-                        query = (
-                            select(distinct(meta_column.cast(String)))
-                            .where(meta_column.isnot(None))
-                            .limit(5)
-                        )
+                        if isinstance(column["type"], Date):
+                            query = (
+                                select(meta_column.cast(String))
+                                .distinct()
+                                .where(meta_column.isnot(None))
+                                .limit(5)
+                            )
+                        else:
+                            query = (
+                                select(meta_column)
+                                .distinct()
+                                .where(meta_column.isnot(None))
+                                .limit(5)
+                            )
                         result = connection.execute(query)
                         samples = [str(row[0]) for row in result]
                     except SQLAlchemyError as e:
@@ -156,7 +165,7 @@ class DatabaseParser:
 
                 # Min/Max values (only for non-null values)
                 if col_profile.non_null_count > 0:
-                    min_max_query = select(func.min(meta_column.cast(String)), func.max(meta_column.cast(String)))
+                    min_max_query = select(func.min(meta_column), func.max(meta_column))
                     min_val, max_val = connection.execute(min_max_query).first()
                     col_profile.min_value = str(min_val) if min_val is not None else None
                     col_profile.max_value = str(max_val) if max_val is not None else None
