@@ -1,0 +1,7 @@
+name: ddl
+
+# DDL-specific parameters
+allow_comments: true
+include_comment_text: true
+include_examples: true
+include_profiling: true

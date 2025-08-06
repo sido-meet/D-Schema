@@ -1,5 +1,6 @@
 # d_schema/db_parser.py
 
+import os
 from sqlalchemy import create_engine, inspect, select, distinct, func, MetaData, String, Date
 from sqlalchemy.exc import SQLAlchemyError
 from datasketch import MinHash, LeanMinHash
@@ -25,7 +26,7 @@ class DatabaseParser:
         """
         self.engine = create_engine(db_url)
 
-    def parse(self, profile: bool = False) -> DatabaseSchema:
+    def parse(self, profile: bool = False, num_samples: int = 5) -> DatabaseSchema:
         """
         Parses the database and returns a DatabaseSchema object.
 
@@ -36,6 +37,11 @@ class DatabaseParser:
             A DatabaseSchema object containing the database structure.
         """
         db_name = self.engine.url.database
+        # For SQLite, the database name is the file path. Let's just get the filename without the extension.
+        if self.engine.dialect.name == 'sqlite':
+            basename = os.path.basename(db_name)
+            db_name, _ = os.path.splitext(basename)
+
         tables_info = []
         inspector = inspect(self.engine)
         metadata = MetaData()
@@ -80,14 +86,14 @@ class DatabaseParser:
                                 select(meta_column.cast(String))
                                 .distinct()
                                 .where(meta_column.isnot(None))
-                                .limit(5)
+                                .limit(num_samples)
                             )
                         else:
                             query = (
                                 select(meta_column)
                                 .distinct()
                                 .where(meta_column.isnot(None))
-                                .limit(5)
+                                .limit(num_samples)
                             )
                         result = connection.execute(query)
                         samples = [str(row[0]) for row in result]

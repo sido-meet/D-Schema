@@ -1,0 +1,11 @@
+defaults:
+  - generator: ddl
+  - _self_
+
+# --- Main Parameters ---
+db_url: "sqlite:///test_data/test.db"
+output_path: "./schema_output"
+num_samples: 1 # Number of distinct sample values to fetch for each column
+
+# To run multiple generators, override on the command line:
+# python -m d_schema.app --multirun generator=ddl,m_schema,profile_report

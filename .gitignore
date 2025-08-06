@@ -49,3 +49,4 @@ __MACOSX/
 
 # Generated output directory
 schema_output/
+programmatic_output/

@@ -27,39 +27,125 @@ Install the library using `pip`. You can install it directly from this repositor
 pip install -e .
 ```
 
-## Usage
+# D-Schema
 
-`d-schema` is designed to be used as a library. The main entry point is the `d_schema.generate()` function.
+D-Schema is a versatile Python library and application designed to connect to a database, parse its structure, and generate various schema definitions. It uses Hydra for powerful and flexible configuration.
 
-A complete, runnable example can be found in the `examples/` directory. Here is a brief overview of how to use it:
+## Features
 
-```python
-import d_schema
-import os
+- **Dynamic Database Parsing**: Leverages `SQLAlchemy` to support a wide range of database backends.
+- **Multiple Schema Formats**: Generate various types of schema definitions, including DDL, M-Schema, MAC-SQL, and a data profiling report.
+- **Powerful Configuration**: Uses Hydra to allow easy configuration of database URLs, output paths, and generator-specific parameters from the command line.
+- **Extensible by Design**: The internal structure makes it straightforward to add new schema generators.
 
-# 1. Define your database connection URL and output path
-DB_URL = "sqlite:///test_data/test.db" 
-OUTPUT_DIR = "./schema_output"
+## Installation
 
-# 2. Specify which generators you want to run
-GENERATORS_TO_RUN = ["ddl", "m_schema", "profile_report"]
-
-# 3. Run the generation process
-d_schema.generate(
-    db_url=DB_URL,
-    output_path=OUTPUT_DIR,
-    generators=GENERATORS_TO_RUN
-)
-```
-
-To run the example script from the project root, use the following command:
+First, create and activate a virtual environment:
 
 ```bash
-# Make sure you have installed the project with `pip install -e .`
-python examples/example.py
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-This will create the `schema_output` directory and place the generated files inside.
+Install the library and its dependencies using `pip`:
+
+```bash
+pip install -e .
+```
+
+## Usage
+
+D-Schema is run as a Python module from the command line. It is configured using Hydra.
+
+### Basic Usage
+
+To run with the default configuration (generates a DDL schema for the test database), run:
+
+```bash
+python -m d_schema.app
+```
+
+This will generate a `schema.ddl` file in the `schema_output/` directory.
+
+### Overriding Configuration
+
+You can override any configuration parameter from the command line.
+
+- **Change the database URL and output path:**
+  ```bash
+  python -m d_schema.app db_url="postgresql://user:pass@host/db" output_path="./my_schemas"
+  ```
+
+- **Run a different generator:**
+  ```bash
+  python -m d_schema.app generator=m_schema
+  ```
+
+### Running a Different Generator
+
+To run a generator other than the default, override the `generator` parameter:
+
+```bash
+python -m d_schema.app generator=m_schema
+```
+
+To generate multiple schema formats, you will need to run the command multiple times with different `generator` values.
+
+### Configuring Generator Parameters
+
+You can change the parameters for a specific generator. For example, to generate a DDL schema without any comments:
+
+```bash
+python -m d_schema.app generator=ddl generator.allow_comments=false
+```
+
+Or to generate a DDL schema with only profiling info in the comments:
+
+```bash
+python -m d_schema.app generator=ddl generator.include_comment_text=false generator.include_examples=false
+```
+
+All configuration files can be found in the `conf/` directory.
+
+## Project Structure
+
+- `conf/`: Contains all Hydra configuration files.
+- `src/d_schema/`: The main package source code.
+  - `app.py`: The main Hydra application entry point.
+  - `db_parser.py`: Database parsing logic.
+  - `structures.py`: Core data structures.
+  - `generators/`: Schema generator plugins.
+
+## Programmatic Usage
+
+While the command-line interface is convenient, `d-schema` is fundamentally a library. You can use its components directly in your own Python code for more complex workflows or integrations.
+
+An example of programmatic usage can be found in `examples/programmatic_usage.py`.
+
+Here is a brief overview:
+
+```python
+from d_schema import DatabaseParser, DDLSchemaGenerator
+
+# 1. Initialize the parser and parse the database
+parser = DatabaseParser(db_url="sqlite:///path/to/your.db")
+db_structure = parser.parse(profile=True) # Enable profiling if needed
+
+# 2. Initialize a generator with the parsed structure
+# You can configure the generator directly
+ddl_generator = DDLSchemaGenerator(
+    schema=db_structure,
+    allow_comments=False # Example: disable comments
+)
+
+# 3. Generate the content and save it
+output_content = ddl_generator.generate_schema()
+with open("my_schema.ddl", "w") as f:
+    f.write(output_content)
+```
+
+This approach gives you full control over the parsing and generation process.
+
 
 ## Project Structure
 
