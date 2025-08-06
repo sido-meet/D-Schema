@@ -1,7 +1,7 @@
 [project]
 name = "d-schema"
 version = "0.1.0"
-description = "A tool to generate database schemas in various formats."
+description = "A Python library to generate database schemas in various formats."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -11,9 +11,5 @@ dependencies = [
     "sqlalchemy>=2.0.0",
 ]
 
-[project.scripts]
-d-schema = "d_schema.main:main"
-
 [tool.setuptools.packages.find]
-include = ["d_schema*" ]
-exclude = ["tests*"]
+where = ["src"]
